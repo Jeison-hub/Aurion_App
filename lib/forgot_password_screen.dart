@@ -5,55 +5,98 @@ class ForgotPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController _emailController = TextEditingController();
+
     return Scaffold(
-      backgroundColor: const Color(0xFF3E1E68),
+      backgroundColor: const Color(0xFF1A082E),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF3E1E68),
+        backgroundColor: const Color(0xFF1A082E),
         elevation: 0,
-        title: const Text('Recuperar contraseña'),
+        title: const Text(
+          'Recuperar contraseña',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
-        foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(30.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text(
-              'Ingresa tu correo electrónico o nombre de usuario para recuperar tu cuenta.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 16),
+            const SizedBox(height: 60),
+
+            // 🔹 Logo Aurion
+            Image.asset(
+              'assets/logo.png',
+              height: 120,
+              errorBuilder: (context, error, stackTrace) => const Icon(
+                Icons.lock_outline,
+                color: Colors.white54,
+                size: 80,
+              ),
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 40),
+
+            const Text(
+              'Ingresa tu correo electrónico registrado y te enviaremos un enlace para restablecer tu contraseña.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70, fontSize: 15),
+            ),
+
+            const SizedBox(height: 30),
+
             TextField(
+              controller: _emailController,
+              style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
-                hintText: 'Correo o usuario',
+                hintText: 'Correo electrónico',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 25),
+
             ElevatedButton(
+              onPressed: () {
+                if (_emailController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Por favor ingresa tu correo electrónico.'),
+                      backgroundColor: Color(0xFF6A1B9A),
+                    ),
+                  );
+                  return;
+                }
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Correo de recuperación enviado 📧',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: Color(0xFF6A1B9A),
+                  ),
+                );
+
+                Navigator.pop(context);
+              },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF3E1E68),
+                backgroundColor: Colors.amber,
+                foregroundColor: Colors.black,
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Correo de recuperación enviado.'),
-                  ),
-                );
-              },
-              child: const Text('Enviar'),
+              child: const Text(
+                'Enviar enlace de recuperación',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
