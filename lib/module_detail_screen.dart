@@ -24,6 +24,7 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
   void initState() {
     super.initState();
     progreso = widget.progresoInicial;
+    completado = progreso >= 1.0;
   }
 
   @override
@@ -45,28 +46,26 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
               style: TextStyle(color: Colors.white, fontSize: 18),
             ),
             const SizedBox(height: 10),
+
             Expanded(
               child: SingleChildScrollView(
                 child: const Text(
-                  'En esta lección aprenderás los conceptos básicos de seguridad digital, '
-                      'como la importancia de usar contraseñas seguras, no compartir información '
-                      'personal, identificar sitios web fraudulentos y mantener actualizado tu software.\n\n'
-                      '1. Usa contraseñas con al menos 8 caracteres, letras mayúsculas, minúsculas y símbolos.\n'
-                      '2. No compartas tus credenciales con nadie.\n'
-                      '3. Asegúrate de verificar los dominios antes de ingresar datos sensibles.\n'
-                      '4. Activa la autenticación en dos pasos cuando sea posible.\n'
-                      '5. Evita redes Wi-Fi públicas para acceder a información importante.',
+                  'En esta lección aprenderás los conceptos básicos de seguridad digital...',
                   style: TextStyle(color: Colors.white70, fontSize: 15),
                 ),
               ),
             ),
+
             const SizedBox(height: 20),
+
             LinearProgressIndicator(
               value: progreso,
               color: Colors.yellow,
               backgroundColor: Colors.white24,
             ),
+
             const SizedBox(height: 20),
+
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: completado ? Colors.grey : Colors.white,
@@ -80,18 +79,22 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
                   progreso = 1.0;
                   completado = true;
                 });
+
                 widget.onComplete(1.0);
+
+                // Mostrar mensaje ANTES de navegar hacia atrás
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      '¡Lección completada! Has ganado un nuevo logro.',
-                    ),
+                  const SnackBar(
+                    content: Text('¡Lección completada! Has ganado un nuevo logro.'),
                   ),
                 );
-                Navigator.pop(context);
+
+                // Cerrar después de un breve delay, más seguro
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (mounted) Navigator.pop(context);
+                });
               },
-              child: Text(
-                  completado ? 'Completado ✓' : 'Marcar como completado'),
+              child: Text(completado ? 'Completado ✓' : 'Marcar como completado'),
             ),
           ],
         ),

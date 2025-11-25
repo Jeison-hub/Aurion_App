@@ -10,8 +10,11 @@ Future<void> main() async {
   // 👇 Inicializa Hive antes de correr la app
   await Hive.initFlutter();
 
-  // 👇 Abre una box para guardar el progreso de los usuarios
+  // 👇 Abre box para guardar progreso de usuario
   await Hive.openBox('progressBox');
+
+  // 👇 Abre box para guardar información del usuario logueado
+  await Hive.openBox('usersBox');   // 🔥 ESTA ES LA NUEVA LÍNEA
 
   // 👇 Corre la app con Provider
   runApp(
@@ -38,3 +41,4 @@ class AurionApp extends StatelessWidget {
     );
   }
 }
+

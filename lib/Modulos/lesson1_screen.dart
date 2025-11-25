@@ -6,11 +6,12 @@ class Lesson1Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LessonTemplate(
-      title: 'Módulo 1: Phishing',
+    return LessonTemplate(
+      title: 'Módulo 1: Phising',
       description:
-      'Aprende qué es el phishing, cómo identificar correos falsos y cómo protegerte de fraudes digitales.',
-      videoUrl: 'https://www.youtube.com/watch?v=8PjZ8I4CZvw',
+      'Aprende cómo reconocer un ataque de pishing ya que es un ataque muy comun.',
+      videoUrl: 'https://www.youtube.com/watch?v=UuuAlP7ay6U&t=3s',
+      moduleKey: "modulo1",
     );
   }
 }

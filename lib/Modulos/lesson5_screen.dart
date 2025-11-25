@@ -6,11 +6,12 @@ class Lesson5Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LessonTemplate(
-      title: 'Módulo 5: Seguridad en redes sociales',
+    return LessonTemplate(
+      title: 'Módulo 5: Navegación segura',
       description:
-      'Aprende a configurar tu privacidad, detectar suplantaciones y mantener tu información segura en redes sociales.',
-      videoUrl: 'https://www.youtube.com/watch?v=tmzH2TPyqvE',
+      'La navegacion segura es una de las mas importantes ya que te ayuda a mantenerte a salvo de posibles ataques',
+      videoUrl: 'https://www.youtube.com/watch?v=cjSNVxtXY-U',
+      moduleKey: "modulo5",
     );
   }
 }

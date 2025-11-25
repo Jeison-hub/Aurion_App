@@ -6,11 +6,12 @@ class Lesson2Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LessonTemplate(
+    return LessonTemplate(
       title: 'Módulo 2: Vishing',
       description:
-      'El vishing utiliza llamadas telefónicas para engañar a las personas. Aprende a detectar este tipo de fraude.',
-      videoUrl: 'https://www.youtube.com/watch?v=OJd1QqfDRJE',
+      'El vishing utiliza llamadas telefónicas para engañar a las personas.',
+      videoUrl: 'https://www.youtube.com/watch?v=sc9wmjR3l6g',
+      moduleKey: "modulo2",
     );
   }
 }

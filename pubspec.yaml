@@ -100,7 +100,7 @@ flutter:
   assets:
     - assets/logo.png
     - assets/phishing_example.png
-
+    - assets/trofeos/
 
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -111,12 +111,15 @@ flutter_launcher_icons:
   dependencies:
     flutter:
       sdk: flutter
+      firebase_core: ^3.1.1
+      firebase_auth: ^5.1.2
   cupertino_icons: ^1.0.8
   youtube_player_flutter: ^8.1.2
   sqflite: ^2.3.0
   path: ^1.9.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+
 
 
 

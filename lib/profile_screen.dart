@@ -3,13 +3,31 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final String userName;
+  final String userEmail;
+
+  const ProfileScreen({
+    super.key,
+    required this.userName,
+    required this.userEmail,
+  });
 
   @override
   Widget build(BuildContext context) {
     final progressController = Provider.of<ProgressController>(context);
     final totalProgress = progressController.totalProgress;
     final achievements = progressController.achievements;
+
+    // 🔹 Rutas de imágenes de trofeos
+    final trophyImages = [
+      'assets/trofeos/trofeo1.png',
+      'assets/trofeos/trofeo2.png',
+      'assets/trofeos/trofeo3.png',
+      'assets/trofeos/trofeo4.png',
+      'assets/trofeos/trofeo5.png',
+      'assets/trofeos/trofeo6.png',
+      'assets/trofeos/trofeo7.png',
+    ];
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A082E),
@@ -30,23 +48,35 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 30,
-                    backgroundColor: Color(0xFFFFD700),
-                    child: Text('A', style: TextStyle(color: Colors.black, fontSize: 24)),
+                    backgroundColor: const Color(0xFFFFD700),
+                    child: Text(
+                      userName.isNotEmpty
+                          ? userName[0].toUpperCase()
+                          : userEmail[0].toUpperCase(),
+                      style: const TextStyle(color: Colors.black, fontSize: 24),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Admin',
-                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        Text(
+                          userName.isNotEmpty ? userName : userEmail,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        const Text(
-                          'admin@example.com',
-                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                        Text(
+                          userEmail,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         LinearProgressIndicator(
@@ -57,7 +87,10 @@ class ProfileScreen extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           '${(totalProgress * 100).toStringAsFixed(0)}% completado',
-                          style: const TextStyle(color: Colors.white54, fontSize: 12),
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -65,15 +98,13 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
+
             const SizedBox(height: 24),
 
             // 🔹 Sección de trofeos
-            Align(
-              alignment: Alignment.centerLeft,
-              child: const Text(
-                'Trofeos obtenidos 🏆',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+            const Text(
+              "Trofeos obtenidos",
+              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
 
@@ -87,16 +118,25 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 itemBuilder: (context, index) {
                   final unlocked = achievements[index];
+
                   return Container(
                     decoration: BoxDecoration(
-                      color: unlocked ? const Color(0xFFFFD700) : Colors.white10,
+                      color: const Color(0xFF2E114D),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white30),
+                      border: Border.all(color: Colors.white24),
                     ),
+                    padding: const EdgeInsets.all(8),
                     child: Center(
-                      child: Icon(
-                        unlocked ? Icons.emoji_events : Icons.lock,
-                        color: unlocked ? Colors.black : Colors.white38,
+                      child: unlocked
+                          ? Image.asset(
+                        trophyImages[index],
+                        width: 55,
+                        height: 55,
+                        fit: BoxFit.contain,
+                      )
+                          : Icon(
+                        Icons.lock,
+                        color: Colors.white24,
                         size: 40,
                       ),
                     ),
@@ -105,17 +145,19 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
 
-            // 🔹 Botón de limpiar historial
             const SizedBox(height: 16),
+
+            // 🔹 Botón de limpiar historial
             ElevatedButton(
               onPressed: () {
-                // Restablecer progreso y trofeos
-                for (int i = 0; i < achievements.length; i++) {
-                  progressController.updateProgress(i, 0.0);
-                }
+                progressController.resetProgress();
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Historial limpiado. Todo el progreso ha sido reiniciado.'),
+                    content: Text(
+                      'Historial limpiado. Todo el progreso ha sido reiniciado.',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     backgroundColor: Color(0xFF6A1B9A),
                   ),
                 );

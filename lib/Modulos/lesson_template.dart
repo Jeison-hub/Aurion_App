@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+
+import '../progress_controller.dart';
+import 'quiz_screen.dart';
+import 'module_quizzes.dart';
 
 class LessonTemplate extends StatefulWidget {
   final String title;
   final String description;
   final String videoUrl;
+  final String moduleKey;
 
   const LessonTemplate({
     super.key,
     required this.title,
     required this.description,
     required this.videoUrl,
+    required this.moduleKey,
   });
 
   @override
@@ -19,6 +26,8 @@ class LessonTemplate extends StatefulWidget {
 
 class _LessonTemplateState extends State<LessonTemplate> {
   late YoutubePlayerController _controller;
+
+  bool quizCompleted = false; // ← Nuevo
 
   @override
   void initState() {
@@ -43,25 +52,92 @@ class _LessonTemplateState extends State<LessonTemplate> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            YoutubePlayer(
-              controller: _controller,
-              showVideoProgressIndicator: true,
-            ),
+            YoutubePlayer(controller: _controller),
+
             const SizedBox(height: 20),
+
             Text(
               widget.description,
               style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
+
             const SizedBox(height: 20),
+
+            // -------------------------------------------------------
+            //   BOTÓN DEL QUIZ
+            // -------------------------------------------------------
             ElevatedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('¡Módulo completado! 🎉'),
-                    backgroundColor: Colors.green,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => QuizScreen(
+                      questions: moduleQuizzes[widget.moduleKey]!,
+                    ),
                   ),
                 );
+
+                if (result == true) {
+                  setState(() => quizCompleted = true);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("¡Quiz aprobado! Ahora puedes completar el módulo."),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Quiz no aprobado. Intenta nuevamente."),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
+              child: const Text("Realizar Quiz"),
+            ),
+
+            const SizedBox(height: 20),
+
+            // -------------------------------------------------------
+            //   BOTÓN COMPLETAR MÓDULO (solo si aprueba el quiz)
+            // -------------------------------------------------------
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: quizCompleted ? Colors.yellow : Colors.grey,
+                foregroundColor: Colors.black,
+              ),
+              onPressed: quizCompleted
+                  ? () {
+                final progressController =
+                Provider.of<ProgressController>(context, listen: false);
+
+                progressController.updateProgress(widget.moduleKey, 1.0);
+
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text("¡Módulo completado!"),
+                    content: const Text(
+                        "Excelente trabajo. Has aprendido conceptos clave de seguridad digital."),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Aceptar"),
+                      ),
+                    ],
+                  ),
+                );
+              }
+                  : null,
               child: const Text("Completar módulo"),
             ),
           ],

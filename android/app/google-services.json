@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "341329336512",
+    "project_id": "aurionapp-928b9",
+    "storage_bucket": "aurionapp-928b9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:341329336512:android:f959e904a7f978e801f525",
+        "android_client_info": {
+          "package_name": "Aurion_app.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmGcCwSpMQeqrprGTzq04YuwsyNBAwDEI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

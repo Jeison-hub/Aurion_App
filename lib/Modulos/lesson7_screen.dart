@@ -6,11 +6,12 @@ class Lesson7Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LessonTemplate(
-      title: 'Módulo 7: Ciberseguridad avanzada',
+    return LessonTemplate(
+      title: 'Módulo 7: Proteccion de datos personales.',
       description:
-      'Un repaso general sobre cómo mantenerte seguro en línea: autenticación de dos pasos, copias de seguridad y más.',
-      videoUrl: 'https://www.youtube.com/watch?v=O6Ra6vGi3Lo',
+      'Aprende cómo crear contraseñas robustas y proteger tus cuentas.',
+      videoUrl: 'https://www.youtube.com/watch?v=gSmHy5wE-dU',
+      moduleKey: "modulo7",
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -23,14 +24,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return List.generate(12, (index) => chars[random.nextInt(chars.length)]).join();
   }
 
-  void _register() {
+  // 🔹 Nueva función: validar correo
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(
+      r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+    );
+    return emailRegex.hasMatch(email);
+  }
+
+  void _register() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor completa todos los campos.'),
+          content: Text(
+            'Por favor completa todos los campos.',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Color(0xFF6A1B9A),
+        ),
+      );
+      return;
+    }
+
+    // 🔹 Validación de correo
+    if (!_isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Por favor ingresa un correo válido.',
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: Color(0xFF6A1B9A),
         ),
       );
@@ -40,16 +66,46 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (password.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('La contraseña debe tener al menos 8 caracteres.'),
+          content: Text(
+            'La contraseña debe tener al menos 8 caracteres.',
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: Color(0xFF6A1B9A),
         ),
       );
       return;
     }
 
+    // 🔹 Abrir la box de usuarios
+    var userBox = Hive.box('usersBox');
+
+    // 🔹 Comprobar si ya existe
+    if (userBox.containsKey(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Este correo ya está registrado.',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Color(0xFF6A1B9A),
+        ),
+      );
+      return;
+    }
+
+    // 🔹 Guardar usuario
+    await userBox.put(email, {
+      'name': email,
+      'password': password,
+      'isAdmin': false,
+    });
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('¡Registro exitoso! Ahora puedes iniciar sesión.'),
+        content: Text(
+          '¡Registro exitoso! Ahora puedes iniciar sesión.',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Color(0xFF6A1B9A),
       ),
     );
@@ -116,7 +172,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 8),
 
-            // 🔹 Sugerencia de contraseña segura (aparece al tocar el campo)
             if (_showGeneratedPassword)
               Container(
                 margin: const EdgeInsets.only(top: 8),
@@ -135,10 +190,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SelectableText(
                       _generatedPassword,
                       style: const TextStyle(
-                        color: Colors.amber,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
+                          color: Colors.amber,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
@@ -157,10 +211,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         );
                       },
                       icon: const Icon(Icons.copy, color: Colors.black),
-                      label: const Text(
-                        'Usar esta contraseña',
-                        style: TextStyle(color: Colors.black),
-                      ),
+                      label: const Text('Usar esta contraseña',
+                          style: TextStyle(color: Colors.black)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.amber,
                       ),

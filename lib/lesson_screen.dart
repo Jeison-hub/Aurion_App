@@ -66,7 +66,7 @@ class LessonScreen extends StatelessWidget {
 
                 if (current < 1.0) {
                   // updateProgress ya guarda en Hive y desbloquea el trofeo si value == 1.0
-                  progressController.updateProgress(index, 1.0);
+                  progressController.updateProgress(index as String, 1.0);
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

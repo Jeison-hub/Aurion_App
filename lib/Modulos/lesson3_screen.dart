@@ -6,11 +6,12 @@ class Lesson3Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LessonTemplate(
+    return LessonTemplate(
       title: 'Módulo 3: Smishing',
       description:
-      'Descubre cómo los ciberdelincuentes usan mensajes SMS falsos con enlaces maliciosos para robar datos.',
-      videoUrl: 'https://www.youtube.com/watch?v=aCuvVv4Kqiw',
+      'El smishing usa mensajes SMS engañosos para robar información.',
+      videoUrl: 'https://www.youtube.com/watch?v=t6k24MQFCsw',
+      moduleKey: "modulo3",
     );
   }
 }

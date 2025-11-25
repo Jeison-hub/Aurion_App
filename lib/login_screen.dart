@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
-import 'forgot_password_screen.dart'; // 🔹 Agrega esto
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,7 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  void _login() {
+  Future<void> _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
@@ -44,13 +45,50 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    // 🔹 Buscar usuario en Hive
+    var userBox = Hive.box('usersBox');
+
+    if (!userBox.containsKey(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'El usuario no existe.',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Color(0xFF6A1B9A),
+        ),
+      );
+      return;
+    }
+
+    var userData = userBox.get(email);
+
+    if (userData['password'] != password) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Contraseña incorrecta.',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Color(0xFF6A1B9A),
+        ),
+      );
+      return;
+    }
+
+    // 🔹 Si todo está bien → navegar al HomeScreen
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      MaterialPageRoute(
+        builder: (context) => HomeScreen(
+          userEmail: email,
+          userName: userData['name'],
+          isAdmin: userData['isAdmin'],
+        ),
+      ),
     );
   }
 
-  // 🔹 Aquí reemplazamos la función por la navegación correcta
   void _recoverPassword() {
     Navigator.push(
       context,
@@ -68,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 80),
-            // 🔹 Imagen del logo (asegúrate que exista en assets/logo.png)
+
             Image.asset(
               'assets/logo.png',
               height: 140,
@@ -77,6 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     size: 80, color: Colors.white54);
               },
             ),
+
             const SizedBox(height: 40),
             const Text(
               'Iniciar sesión',
@@ -86,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+
             const SizedBox(height: 20),
             TextField(
               controller: _emailController,
@@ -99,6 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
+
             const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
@@ -113,39 +154,43 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
+
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: _recoverPassword, // 🔹 Ahora abre la pantalla correcta
+                onPressed: _recoverPassword,
                 child: const Text(
                   '¿Olvidaste tu contraseña?',
                   style: TextStyle(color: Colors.white70),
                 ),
               ),
             ),
+
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _login,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.amber,
-                padding:
-                const EdgeInsets.symmetric(horizontal: 100, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 100, vertical: 14),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
               child: const Text(
                 'Ingresar',
-                style:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.bold),
               ),
             ),
+
             const SizedBox(height: 20),
             TextButton(
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const RegisterScreen()),
                 );
               },
               child: const Text(

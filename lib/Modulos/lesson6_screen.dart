@@ -6,11 +6,12 @@ class Lesson6Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LessonTemplate(
-      title: 'Módulo 6: Malware y virus',
+    return LessonTemplate(
+      title: 'Módulo 6: Seguridad en redes Wi-Fi',
       description:
-      'Comprende cómo los virus y troyanos infectan los dispositivos y cómo protegerte usando software adecuado.',
-      videoUrl: 'https://www.youtube.com/watch?v=O9b_rh1GXfk',
+      'Descubre cómo la seguridad de tu internet es de vital importancia.',
+      videoUrl: 'https://www.youtube.com/watch?v=2xdUcmMiK10',
+      moduleKey: "modulo6",
     );
   }
 }
