@@ -7,6 +7,7 @@ import 'quiz_screen.dart';
 import 'module_quizzes.dart';
 
 class LessonTemplate extends StatefulWidget {
+
   final String title;
   final String description;
   final String videoUrl;
@@ -21,124 +22,246 @@ class LessonTemplate extends StatefulWidget {
   });
 
   @override
-  State<LessonTemplate> createState() => _LessonTemplateState();
+  State<LessonTemplate> createState() =>
+      _LessonTemplateState();
 }
 
-class _LessonTemplateState extends State<LessonTemplate> {
+class _LessonTemplateState
+    extends State<LessonTemplate> {
+
   late YoutubePlayerController _controller;
 
-  bool quizCompleted = false; // ← Nuevo
+  bool quizCompleted = false;
 
   @override
   void initState() {
+
     super.initState();
-    final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
+
+    final videoId =
+    YoutubePlayer.convertUrlToId(
+      widget.videoUrl,
+    );
+
     _controller = YoutubePlayerController(
+
       initialVideoId: videoId ?? '',
-      flags: const YoutubePlayerFlags(autoPlay: false, mute: false),
+
+      flags: const YoutubePlayerFlags(
+        autoPlay: false,
+        mute: false,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      backgroundColor: const Color(0xFF1A082E),
+
+      backgroundColor:
+      const Color(0xFF1A082E),
+
       appBar: AppBar(
+
         title: Text(widget.title),
-        backgroundColor: const Color(0xFF3E1E68),
+
+        backgroundColor:
+        const Color(0xFF3E1E68),
       ),
+
       body: Padding(
+
         padding: const EdgeInsets.all(16.0),
+
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+
+          crossAxisAlignment:
+          CrossAxisAlignment.start,
+
           children: [
-            YoutubePlayer(controller: _controller),
 
-            const SizedBox(height: 20),
-
-            Text(
-              widget.description,
-              style: const TextStyle(color: Colors.white70, fontSize: 16),
+            // 🔥 VIDEO
+            YoutubePlayer(
+              controller: _controller,
             ),
 
             const SizedBox(height: 20),
 
-            // -------------------------------------------------------
-            //   BOTÓN DEL QUIZ
-            // -------------------------------------------------------
+            // 🔥 DESCRIPCIÓN
+            Text(
+
+              widget.description,
+
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // =====================================================
+            // 🔥 BOTÓN QUIZ
+            // =====================================================
+
             ElevatedButton(
+
               style: ElevatedButton.styleFrom(
+
                 backgroundColor: Colors.blue,
+
                 foregroundColor: Colors.white,
               ),
+
               onPressed: () async {
-                final result = await Navigator.push(
+
+                final result =
+                await Navigator.push(
+
                   context,
+
                   MaterialPageRoute(
+
                     builder: (_) => QuizScreen(
-                      questions: moduleQuizzes[widget.moduleKey]!,
+
+                      questions:
+                      moduleQuizzes[
+                      widget.moduleKey
+                      ]!,
                     ),
                   ),
                 );
 
+                // 🔥 QUIZ APROBADO
                 if (result == true) {
-                  setState(() => quizCompleted = true);
 
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  setState(() {
+
+                    quizCompleted = true;
+                  });
+
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(
+
                     const SnackBar(
-                      content: Text("¡Quiz aprobado! Ahora puedes completar el módulo."),
-                      backgroundColor: Colors.green,
+
+                      content: Text(
+                        "¡Quiz aprobado! Ahora puedes completar el módulo.",
+                      ),
+
+                      backgroundColor:
+                      Colors.green,
                     ),
                   );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                }
+
+                // 🔥 QUIZ NO APROBADO
+                else {
+
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(
+
                     const SnackBar(
-                      content: Text("Quiz no aprobado. Intenta nuevamente."),
-                      backgroundColor: Colors.red,
+
+                      content: Text(
+                        "Quiz no aprobado. Intenta nuevamente.",
+                      ),
+
+                      backgroundColor:
+                      Colors.red,
                     ),
                   );
                 }
               },
-              child: const Text("Realizar Quiz"),
+
+              child: const Text(
+                "Realizar Quiz",
+              ),
             ),
 
             const SizedBox(height: 20),
 
-            // -------------------------------------------------------
-            //   BOTÓN COMPLETAR MÓDULO (solo si aprueba el quiz)
-            // -------------------------------------------------------
+            // =====================================================
+            // 🔥 COMPLETAR MÓDULO
+            // =====================================================
+
             ElevatedButton(
+
               style: ElevatedButton.styleFrom(
-                backgroundColor: quizCompleted ? Colors.yellow : Colors.grey,
-                foregroundColor: Colors.black,
+
+                backgroundColor:
+                quizCompleted
+                    ? Colors.yellow
+                    : Colors.grey,
+
+                foregroundColor:
+                Colors.black,
               ),
+
               onPressed: quizCompleted
-                  ? () {
+
+                  ? () async {
+
                 final progressController =
-                Provider.of<ProgressController>(context, listen: false);
 
-                progressController.updateProgress(widget.moduleKey, 1.0);
+                Provider.of<
+                    ProgressController>(
+                  context,
+                  listen: false,
+                );
 
+                // 🔥 GUARDAR EN FIRESTORE
+                await progressController
+                    .updateProgress(
+                  widget.moduleKey,
+                  1.0,
+                );
+
+                // 🔥 EVITAR ERROR CONTEXT
+                if (!context.mounted) return;
+
+                // 🔥 MENSAJE
                 showDialog(
+
                   context: context,
+
                   builder: (_) => AlertDialog(
-                    title: const Text("¡Módulo completado!"),
+
+                    title: const Text(
+                      "¡Módulo completado!",
+                    ),
+
                     content: const Text(
-                        "Excelente trabajo. Has aprendido conceptos clave de seguridad digital."),
+
+                      "Excelente trabajo. Has aprendido conceptos clave de seguridad digital.",
+                    ),
+
                     actions: [
+
                       TextButton(
+
                         onPressed: () {
+
                           Navigator.pop(context);
+
                           Navigator.pop(context);
                         },
-                        child: const Text("Aceptar"),
+
+                        child: const Text(
+                          "Aceptar",
+                        ),
                       ),
                     ],
                   ),
                 );
               }
+
                   : null,
-              child: const Text("Completar módulo"),
+
+              child: const Text(
+                "Completar módulo",
+              ),
             ),
           ],
         ),
@@ -148,7 +271,9 @@ class _LessonTemplateState extends State<LessonTemplate> {
 
   @override
   void dispose() {
+
     _controller.dispose();
+
     super.dispose();
   }
 }

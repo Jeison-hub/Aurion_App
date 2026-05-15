@@ -1,88 +1,188 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProgressController extends ChangeNotifier {
-  late Box _box;
 
-  // Progreso: { "modulo1": 1.0, "modulo2": 0.5, ... }
   Map<String, double> _progress = {};
 
-  // Trofeos desbloqueados
-  List<bool> _achievements = List.generate(7, (_) => false);
+  List<bool> _achievements =
+  List.generate(7, (_) => false);
+
+  // GETTERS
+  Map<String, double> get progress =>
+      _progress;
+
+  List<bool> get achievements =>
+      _achievements;
 
   ProgressController() {
-    _initHive();
+
+    loadUserProgress();
   }
 
-  Future<void> _initHive() async {
-    await Hive.initFlutter();
-    _box = await Hive.openBox('progressBox');
-    _loadData();
-  }
+  // =====================================================
+  // 🔥 CARGAR PROGRESO DEL USUARIO ACTUAL
+  // =====================================================
 
-  void _loadData() {
-    final savedProgress =
-    Map<String, double>.from(_box.get('progress', defaultValue: {}));
+  Future<void> loadUserProgress() async {
 
-    final savedAchievements = List<bool>.from(
-      _box.get('achievements', defaultValue: List.generate(7, (_) => false)),
-    );
+    final user =
+        FirebaseAuth.instance.currentUser;
 
-    _progress = savedProgress;
-    _achievements = savedAchievements;
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    // 🔥 SI NO EXISTE DOCUMENTO
+    if (!doc.exists) {
+
+      _progress = {};
+
+      _achievements =
+          List.generate(7, (_) => false);
+
+      notifyListeners();
+
+      return;
+    }
+
+    final data = doc.data();
+
+    // 🔥 PROGRESO
+    if (data?['progress'] != null) {
+
+      final rawProgress =
+      Map<String, dynamic>.from(
+        data!['progress'],
+      );
+
+      _progress = rawProgress.map(
+            (key, value) => MapEntry(
+          key,
+          (value as num).toDouble(),
+        ),
+      );
+    }
+
+    // 🔥 ACHIEVEMENTS
+    if (data?['achievements'] != null) {
+
+      _achievements =
+      List<bool>.from(
+        data!['achievements'],
+      );
+    }
 
     notifyListeners();
   }
 
-  // GETTERS
-  Map<String, double> get progress => _progress;
-  List<bool> get achievements => _achievements;
+  // =====================================================
+  // 🔥 TOTAL PROGRESS
+  // =====================================================
 
-  // Progreso total
   double get totalProgress {
+
     const totalModules = 7;
 
     double sum = 0.0;
 
     for (int i = 0; i < totalModules; i++) {
+
       final key = 'modulo${i + 1}';
+
       sum += _progress[key] ?? 0.0;
     }
 
     return sum / totalModules;
   }
 
-  // Obtener progreso de un módulo por índice
+  // =====================================================
+  // 🔥 OBTENER PROGRESO
+  // =====================================================
+
   double getProgress(int index) {
+
     final key = 'modulo${index + 1}';
+
     return _progress[key] ?? 0.0;
   }
 
-  // 🔥 Actualizar progreso usando moduleKey
-  void updateProgress(String moduleKey, double value) {
-    _progress[moduleKey] = value.clamp(0.0, 1.0);
+  // =====================================================
+  // 🔥 ACTUALIZAR PROGRESO
+  // =====================================================
 
-    // Convertir moduleKey → index
-    final index = int.parse(moduleKey.replaceAll("modulo", "")) - 1;
+  Future<void> updateProgress(
+      String moduleKey,
+      double value,
+      ) async {
 
-    if (index >= 0 && index < _achievements.length && value == 1.0) {
+    final user =
+        FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    _progress[moduleKey] =
+        value.clamp(0.0, 1.0);
+
+    final index = int.parse(
+      moduleKey.replaceAll("modulo", ""),
+    ) - 1;
+
+    if (index >= 0 &&
+        index < _achievements.length &&
+        value == 1.0) {
+
       _achievements[index] = true;
     }
 
-    _saveData();
+    // 🔥 GUARDAR EN FIRESTORE
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set({
+
+      'progress': _progress,
+
+      'achievements': _achievements,
+
+    }, SetOptions(merge: true));
+
     notifyListeners();
   }
 
-  void _saveData() {
-    _box.put('progress', _progress);
-    _box.put('achievements', _achievements);
-  }
+  // =====================================================
+  // 🔥 RESET PROGRESS
+  // =====================================================
 
-  // Resetear progreso
-  void resetProgress() {
+  Future<void> resetProgress() async {
+
+    final user =
+        FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
     _progress.clear();
-    _achievements = List.generate(7, (_) => false);
-    _saveData();
+
+    _achievements =
+        List.generate(7, (_) => false);
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set({
+
+      'progress': {},
+
+      'achievements': _achievements,
+
+    }, SetOptions(merge: true));
+
     notifyListeners();
   }
 }

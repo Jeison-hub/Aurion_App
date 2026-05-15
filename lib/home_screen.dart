@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,7 +9,7 @@ import 'achievements_screen.dart';
 
 import 'progress_controller.dart';
 
-// Pantallas de los módulos
+// Pantallas de módulos
 import 'modulos/lesson1_screen.dart';
 import 'modulos/lesson2_screen.dart';
 import 'modulos/lesson3_screen.dart';
@@ -29,11 +30,80 @@ class HomeScreen extends StatelessWidget {
     required this.isAdmin,
   });
 
+  //  FUNCIÓN PARA CERRAR SESIÓN CON CONFIRMACIÓN
+  Future<void> _logout(BuildContext context) async {
+    final bool? confirmLogout = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF2E114D),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.security, color: Colors.amber),
+              SizedBox(width: 10),
+              Text(
+                'Cerrar sesión',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+          content: const Text(
+            '¿Estás seguro de que deseas salir de forma segura de Aurion?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              icon: const Icon(Icons.logout),
+              label: const Text(
+                'Salir',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    //  SI CANCELA → NO HACER NADA
+    if (confirmLogout != true) return;
+
+    //  CERRAR SESIÓN FIREBASE
+    await FirebaseAuth.instance.signOut();
+
+    //  REDIRIGIR AL LOGIN
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+          (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ProgressController>(
       builder: (context, progressController, child) {
-        // 🔥 Progreso total REAL
         final double total = progressController.totalProgress;
 
         final List<Map<String, dynamic>> modulos = [
@@ -48,51 +118,68 @@ class HomeScreen extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: const Color(0xFF1A082E),
+
           appBar: AppBar(
             backgroundColor: const Color(0xFF1A082E),
+
             title: const Text(
               'Aurion',
               style: TextStyle(color: Colors.white),
             ),
+
             actions: [
+              //  LOGROS
               IconButton(
-                icon: const Icon(Icons.emoji_events, color: Colors.white),
+                icon: const Icon(
+                  Icons.emoji_events,
+                  color: Colors.white,
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AchievementsScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const AchievementsScreen(),
+                    ),
                   );
                 },
               ),
+
+              //  HISTORIAL
               IconButton(
-                icon: const Icon(Icons.history, color: Colors.white),
+                icon: const Icon(
+                  Icons.history,
+                  color: Colors.white,
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const HistoryScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const HistoryScreen(),
+                    ),
                   );
                 },
               ),
+
+              //  CERRAR SESIÓN
               IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  );
-                },
+                icon: const Icon(
+                  Icons.logout,
+                  color: Colors.white,
+                ),
+                onPressed: () => _logout(context),
               ),
             ],
           ),
 
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ───────────────────────────────────────────────
+                // ─────────────────────────────
                 // TARJETA DE USUARIO
-                // ───────────────────────────────────────────────
+                // ─────────────────────────────
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -105,23 +192,31 @@ class HomeScreen extends StatelessWidget {
                       ),
                     );
                   },
+
                   child: Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFF2E114D),
                       borderRadius: BorderRadius.circular(16),
                     ),
+
                     padding: const EdgeInsets.all(16),
+
                     child: Row(
                       children: [
                         CircleAvatar(
                           backgroundColor: const Color(0xFFFFD700),
+
                           child: Text(
                             userName.isNotEmpty
                                 ? userName[0].toUpperCase()
                                 : userEmail[0].toUpperCase(),
-                            style: const TextStyle(color: Colors.black),
+
+                            style: const TextStyle(
+                              color: Colors.black,
+                            ),
                           ),
                         ),
+
                         const SizedBox(width: 16),
 
                         Expanded(
@@ -130,28 +225,36 @@ class HomeScreen extends StatelessWidget {
                             children: [
                               Text(
                                 "Bienvenido, ${userName.isNotEmpty ? userName : userEmail}",
+
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+
                               Text(
                                 userEmail,
+
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 12,
                                 ),
                               ),
+
                               const SizedBox(height: 8),
 
-                              // 🔥 Barra de progreso REAL
+                              //  PROGRESO TOTAL
                               LinearProgressIndicator(
                                 value: total,
                                 color: const Color(0xFFFFD700),
                                 backgroundColor: Colors.white24,
                               ),
+
+                              const SizedBox(height: 4),
+
                               Text(
                                 '${(total * 100).round()}% completado',
+
                                 style: const TextStyle(
                                   color: Colors.white54,
                                   fontSize: 12,
@@ -166,48 +269,83 @@ class HomeScreen extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 20),
+
                 const Text(
                   'Módulos de aprendizaje',
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+
                 const SizedBox(height: 10),
 
-                // ───────────────────────────────────────────────
+                // ─────────────────────────────
                 // GRID DE MÓDULOS
-                // ───────────────────────────────────────────────
+                // ─────────────────────────────
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
+
                   itemCount: modulos.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+
+                  gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
                     childAspectRatio: 1.2,
                   ),
+
                   itemBuilder: (context, index) {
-                    // 🔥 Progreso REAL por módulo
                     final String key = "modulo${index + 1}";
-                    final double progreso = progressController.progress[key] ?? 0.0;
+                    final double progreso =
+                        progressController.progress[key] ?? 0.0;
 
                     return GestureDetector(
                       onTap: () {
                         late final Widget targetScreen;
 
                         switch (index) {
-                          case 0: targetScreen = const Lesson1Screen() as Widget; break;
-                          case 1: targetScreen = const Lesson2Screen(); break;
-                          case 2: targetScreen = const Lesson3Screen(); break;
-                          case 3: targetScreen = const Lesson4Screen(); break;
-                          case 4: targetScreen = const Lesson5Screen(); break;
-                          case 5: targetScreen = const Lesson6Screen(); break;
-                          case 6: targetScreen = const Lesson7Screen(); break;
-                          default: targetScreen = const Lesson1Screen() as Widget;
+                          case 0:
+                            targetScreen = const Lesson1Screen();
+                            break;
+
+                          case 1:
+                            targetScreen = const Lesson2Screen();
+                            break;
+
+                          case 2:
+                            targetScreen = const Lesson3Screen();
+                            break;
+
+                          case 3:
+                            targetScreen = const Lesson4Screen();
+                            break;
+
+                          case 4:
+                            targetScreen = const Lesson5Screen();
+                            break;
+
+                          case 5:
+                            targetScreen = const Lesson6Screen();
+                            break;
+
+                          case 6:
+                            targetScreen = const Lesson7Screen();
+                            break;
+
+                          default:
+                            targetScreen = const Lesson1Screen();
                         }
 
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => targetScreen),
+                          MaterialPageRoute(
+                            builder: (context) => targetScreen,
+                          ),
                         );
                       },
 
@@ -216,23 +354,34 @@ class HomeScreen extends StatelessWidget {
                           color: const Color(0xFF2E114D),
                           borderRadius: BorderRadius.circular(12),
                         ),
+
                         padding: const EdgeInsets.all(12),
+
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CircleAvatar(
                               backgroundColor: const Color(0xFFFFD700),
                               radius: 14,
+
                               child: Text(
                                 '${index + 1}',
-                                style: const TextStyle(color: Colors.black),
+
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                ),
                               ),
                             ),
+
                             const SizedBox(height: 8),
 
                             Text(
                               modulos[index]['titulo'],
-                              style: const TextStyle(color: Colors.white, fontSize: 12),
+
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
                             ),
 
                             const Spacer(),
@@ -244,9 +393,14 @@ class HomeScreen extends StatelessWidget {
                             ),
 
                             const SizedBox(height: 4),
+
                             Text(
                               '${(progreso * 100).round()}% completado',
-                              style: const TextStyle(color: Colors.white54, fontSize: 11),
+
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 11,
+                              ),
                             ),
                           ],
                         ),
